@@ -1,0 +1,27 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mcp:
+    build: .
+    command: ["uv", "run", "python", "-m", "src.mcp.server"]
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    depends_on:
+      api:
+        condition: service_healthy
